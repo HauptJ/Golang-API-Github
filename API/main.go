@@ -2,10 +2,11 @@ package main
 
 import (
   "fmt"
+  "log"
   //"strings"
-  "encoding/json"
+  // "encoding/json"
   "net/http"
-  "strconv"
+   "strconv"
   "io/ioutil"
   //"bytes"
   . "./models"
@@ -19,47 +20,28 @@ const GITHUB_API_PAGES = "1"
 
 func GitHubFollowerAPI(githubID string, numLevels uint8, numFollowers uint16, followers *[]User) /*followers []User*/ {
 
-  var locFollowers []User
-
-  client := &http.Client{}
-
-  // map to store returned JSON
-  var res map[string]interface{}
-
   // generate GET request URL
-  followerQuerryBegin := GITHUB_USER_API_ENDPOINT + "/" + githubID + "/followers"
+  followerQuerry := GITHUB_USER_API_ENDPOINT + "/" + githubID + "/followers?page=1&per_page=" + strconv.Itoa(int(numFollowers))
 
-  req, err := http.NewRequest("GET", followerQuerryBegin, nil)
+  fmt.Println(followerQuerry)
+
+  res, err := http.Get(followerQuerry)
+
   if err != nil {
     panic(err)
   }
 
-  req.Header.Add("Accept", "application/json")
-
-  q := req.URL.Query()
-  q.Add("page", GITHUB_API_PAGES)
-  q.Add("per_page", strconv.Itoa(int(numFollowers)))
-  req.URL.RawQuery = q.Encode()
-  fmt.Println(req.URL.String())
-
-  resp, err := client.Do(req)
+  body, err := ioutil.ReadAll(res.Body)
+  res.Body.Close()
   if err != nil {
     panic(err)
   }
 
-  //defer resp.Body.Close()
+  if res.StatusCode != 200 {
+    log.Fatal("Unexpected status code", res.StatusCode)
+  }
 
-  json.NewDecoder(resp.Body).Decode(&res)
-  json.NewDecoder(resp.Body).Decode(&locFollowers)
-  resp_body, _ := ioutil.ReadAll(resp.Body)
-  fmt.Println(resp.Status)
-  fmt.Println(resp_body)
-  fmt.Println(resp.Body)
-  //json.Unmarshal([]byte(resp.Body), &locFollowers)
-  fmt.Println(res)
-  fmt.Println(locFollowers)
-  fmt.Printf("Followers : %+v", locFollowers)
-
+  fmt.Printf("Body: %s\n", body)
 
 }
 
