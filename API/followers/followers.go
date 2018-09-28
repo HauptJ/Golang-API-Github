@@ -2,6 +2,7 @@ package followers
 
 import (
   "fmt"
+  "log"
   "os"
   "github.com/google/go-github/github"
   "golang.org/x/oauth2"
@@ -27,7 +28,7 @@ func getUser(GHUser string, numFollowers int) (User, error) {
 
   followerObjs, _, err := client.Users.ListFollowers(context, GHUser, nil) //TODO: replace nil with correct option to request only the first numFollowers followers
   if err != nil {
-    panic(err)
+    log.Fatal(err)
   }
   if err != nil {
     fmt.Printf("Problem in getting repository information %v\n", err)
@@ -49,14 +50,14 @@ func getUser(GHUser string, numFollowers int) (User, error) {
 }
 
 
-func GenUserObjList(rootUser string, numlvls, numFollowers int) ([]User, error) {
+func GenUserObjList(rootUser string, numLvls, numFollowers int) ([]User, error) {
 
   var userObjList []User
   var newUserObj User
 
   userObj, err := getUser(rootUser, numFollowers)
   if err != nil {
-    panic(err)
+    log.Fatal(err)
   }
   userObjList = append(userObjList, userObj)
   for i := 1; i <= numLvls; i++ {
@@ -64,7 +65,7 @@ func GenUserObjList(rootUser string, numlvls, numFollowers int) ([]User, error) 
       newUserObj, err = getUser(follower, numFollowers)
       userObjList = append(userObjList, newUserObj)
       if err != nil {
-        panic(err)
+        log.Fatal(err)
       }
     }
     userObj = newUserObj
@@ -72,13 +73,14 @@ func GenUserObjList(rootUser string, numlvls, numFollowers int) ([]User, error) 
   return userObjList, err
 }
 
-func main() {
-  userList, err := GenUserObjList("HauptJ", 3, 5)
-  if err != nil {
-    panic(err)
-  }
-
-  for _, userObj := range userList {
-    fmt.Printf("%+v\n", userObj)
-  }
-}
+// DEBUG
+// func main() {
+//   userList, err := GenUserObjList("HauptJ", 3, 5)
+//   if err != nil {
+//     log.Fatal(err)
+//   }
+//
+//   for _, userObj := range userList {
+//     fmt.Printf("%+v\n", userObj)
+//   }
+// }
