@@ -1,76 +1,67 @@
 package main
 
 import (
-  "fmt"
-  //"strings"
-  "encoding/json"
-  "net/http"
-  "strconv"
-  "io/ioutil"
-  //"bytes"
-  . "./models"
+	"context"
+	"fmt"
+
+	"github.com/google/go-github/v18/github"
+  "golang.org/x/oauth2"
 )
 
-/*
-  Constant Declarations
-*/
-const GITHUB_USER_API_ENDPOINT = "https://api.github.com/users"
-const GITHUB_API_PAGES = "1"
-
-func GitHubFollowerAPI(githubID string, numLevels uint8, numFollowers uint16, followers *[]User) /*followers []User*/ {
-
-  var locFollowers []User
-
-  client := &http.Client{}
-
-  // map to store returned JSON
-  var res map[string]interface{}
-
-  // generate GET request URL
-  followerQuerryBegin := GITHUB_USER_API_ENDPOINT + "/" + githubID + "/followers"
-
-  req, err := http.NewRequest("GET", followerQuerryBegin, nil)
-  if err != nil {
-    panic(err)
-  }
-
-  req.Header.Add("Accept", "application/json")
-
-  q := req.URL.Query()
-  q.Add("page", GITHUB_API_PAGES)
-  q.Add("per_page", strconv.Itoa(int(numFollowers)))
-  req.URL.RawQuery = q.Encode()
-  fmt.Println(req.URL.String())
-
-  resp, err := client.Do(req)
-  if err != nil {
-    panic(err)
-  }
-
-  //defer resp.Body.Close()
-
-  json.NewDecoder(resp.Body).Decode(&res)
-  json.NewDecoder(resp.Body).Decode(&locFollowers)
-  resp_body, _ := ioutil.ReadAll(resp.Body)
-  fmt.Println(resp.Status)
-  fmt.Println(resp_body)
-  fmt.Println(resp.Body)
-  //json.Unmarshal([]byte(resp.Body), &locFollowers)
-  fmt.Println(res)
-  fmt.Println(locFollowers)
-  fmt.Printf("Followers : %+v", locFollowers)
-
-
+type Test struct {
+  Name string
+  //ID int64
 }
 
+// Fetch all the public organizations' membership of a user.
+//
+func FetchOrganizations(username string) ([]*github.Organization, error) {
+  ctx := context.Background()
+  ts := oauth2.StaticTokenSource(
+    &oauth2.Token{AccessToken: "153ada3fa801f79fa88e0932133809711c8ee728"},
+  )
+  tc := oauth2.NewClient(ctx, ts)
+  // get go-github client
+  client := github.NewClient(tc)
+	orgs, _, err := client.Organizations.List(ctx, username, nil)
+
+
+  for _, org := range orgs {
+    test := &Test{
+      Name: org.GetLogin(),
+      //ID: *org.ID,
+    }
+    fmt.Printf("%+v\n", test.Name)
+  }
+
+  // for i, organization := range orgs {
+	// 	fmt.Printf("%v. %v\n", i+1, organization.GetLogin())
+  //   fmt.Printf("%v. %v\n", i+1, organization)
+  //   fmt.Println(organization)
+	// }
+
+
+	return orgs, err
+}
 
 func main() {
+	var username string
 
-  var followers []User
+	fmt.Print("Enter GitHub username: ")
+	fmt.Scanf("%s", &username)
 
-  githubID := "HauptJ"
-  var numLevels  uint8 = 1
-  var numFollowers uint16 = 10
-  GitHubFollowerAPI(githubID, numLevels, numFollowers, &followers)
-  fmt.Println(&followers)
+  fmt.Println(username)
+
+	organizations, err := FetchOrganizations(username)
+	if err != nil {
+		fmt.Printf("Error: %v\n", err)
+		return
+	}
+
+	for i, organization := range organizations {
+		fmt.Printf("%v. %v\n", i+1, organization.GetLogin())
+    //fmt.Printf("%v. %v\n", i+1, organization.GetName())
+     //fmt.Printf("%v. %v\n", i+1, organization.ID)
+    // fmt.Println(organization)
+	}
 }
