@@ -1,7 +1,7 @@
 package main
 
 import (
-  "fmt"
+  //"fmt"
   "log"
   "encoding/json"
   "net/http"
@@ -11,13 +11,8 @@ import (
 )
 
 func followersEndPt(writer http.ResponseWriter, req *http.Request) {
-  fmt.Println("req:")
-  fmt.Println(req)
   params := mux.Vars(req)
-  fmt.Println("params:")
-  fmt.Println(params)
-  //userList, err := followers.GenUserObjList(params["user"], 3, 5)
-  userList, err := followers.GenUserObjList("HauptJ", 3, 5)
+  userList, err := followers.GenUserObjList(params["user"], 3, 5)
   if err != nil {
     respondWithError(writer, http.StatusBadRequest, "Well, something went wrong...")
     return
@@ -44,9 +39,9 @@ func respondWithJson(writer http.ResponseWriter, code int, payload interface{}) 
 
 func main() {
   router := mux.NewRouter()
-  router.HandleFunc("/followers", followersEndPt).Methods("GET")
+  router.HandleFunc("/followers/{user}", followersEndPt).Methods("GET")
 
-  if err := http.ListenAndServe(":8080", router); err != nil {
+  if err := http.ListenAndServe(":8880", router); err != nil {
     log.Fatal(err)
   }
 }
