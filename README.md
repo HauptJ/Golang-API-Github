@@ -7,7 +7,7 @@ Utilizes the [go-github](https://github.com/google/go-github) package to interfa
 - **NOTE 2:** On Windows 10 Pro or greater? You can use [Chocolatey](https://chocolatey.org/) to install [Docker CE for Windows](https://chocolatey.org/packages/docker-for-windows/18.06.1.19507) and everything else listed below.
 
 
-1. Install Golang if you want to run the API on your host machine.
+1. Install Golang if you want to run the API on your host machine. If you wish to run the API in a Docker container, you can skip this step.
   - [Golang Download and installation instructions](https://golang.org/dl/)
 
 
