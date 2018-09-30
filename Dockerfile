@@ -12,6 +12,7 @@ MAINTAINER joshua@hauptj.com
 
 ################## Environment Variables ###################
 
+ENV TOKEN=GH_API_TOKEN
 
 ################## Begin Installation ######################
 

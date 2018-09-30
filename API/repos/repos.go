@@ -29,9 +29,11 @@ type UserRepo struct {
 }
 
 func getUserObjGHAPI(GHUser string, numRepos int) (User, error) {
+
+  token := os.Getenv("TOKEN")
   context := context.Background()
   tokenService := oauth2.StaticTokenSource(
-    &oauth2.Token{AccessToken: "TOKEN"},
+    &oauth2.Token{AccessToken: token},
   )
   tokenClient := oauth2.NewClient(context, tokenService)
 
@@ -61,9 +63,11 @@ func getUserObjGHAPI(GHUser string, numRepos int) (User, error) {
 }
 
 func getRepoObjGHAPI(repo RepoName, numStargazers int) (Repo, error) {
+
+  token := os.Getenv("TOKEN")
   context := context.Background()
   tokenService := oauth2.StaticTokenSource(
-    &oauth2.Token{AccessToken: "TOKEN"},
+    &oauth2.Token{AccessToken: token},
   )
   tokenClient := oauth2.NewClient(context, tokenService)
 

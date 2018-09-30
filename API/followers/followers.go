@@ -15,9 +15,10 @@ type User struct {
 
 func getUserObjGHAPI(GHUser string, numFollowers int) (User, error) {
 
+  token := os.Getenv("TOKEN")
   context := context.Background()
   tokenService := oauth2.StaticTokenSource(
-    &oauth2.Token{AccessToken: "TOKEN"},
+    &oauth2.Token{AccessToken: token},
   )
   tokenClient := oauth2.NewClient(context, tokenService)
 
