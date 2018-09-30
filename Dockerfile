@@ -1,5 +1,5 @@
 ############################################################
-# Dockerfile for Golang API
+# Dockerfile for Github Golang API
 # Based on golang latest
 ############################################################
 

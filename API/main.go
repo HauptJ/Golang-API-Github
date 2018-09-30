@@ -1,23 +1,34 @@
 package main
 
 import (
-  //"fmt"
   "log"
   "encoding/json"
   "net/http"
   "github.com/gorilla/mux"
-
   "./followers"
+  "./repos"
 )
 
 func followersEndPt(writer http.ResponseWriter, req *http.Request) {
   params := mux.Vars(req)
   userList, err := followers.GenUserObjList(params["user"], 3, 5)
   if err != nil {
-    respondWithError(writer, http.StatusBadRequest, "Well, something went wrong...")
+    respondWithError(writer, http.StatusBadRequest, "Error with followers endpoint")
     return
   } else {
     respondWithJson(writer, http.StatusOK, userList)
+  }
+}
+
+
+func reposEndPt(writer http.ResponseWriter, req *http.Request) {
+  params := mux.Vars(req)
+  userRepoList, err := repos.GenRepoStargazerLists(params["user"], 3, 5, 5)
+  if err != nil {
+    respondWithError(writer, http.StatusBadRequest, "Error with repos endpoint")
+    return
+  } else {
+    respondWithJson(writer, http.StatusOK, userRepoList)
   }
 }
 
@@ -40,6 +51,7 @@ func respondWithJson(writer http.ResponseWriter, code int, payload interface{}) 
 func main() {
   router := mux.NewRouter()
   router.HandleFunc("/followers/{user}", followersEndPt).Methods("GET")
+  router.HandleFunc("/repos/{user}", reposEndPt).Methods("GET")
 
   if err := http.ListenAndServe(":8880", router); err != nil {
     log.Fatal(err)
