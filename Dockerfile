@@ -12,19 +12,16 @@ MAINTAINER joshua@hauptj.com
 
 ################## Environment Variables ###################
 
-ENV TOKEN=GH_API_TOKEN
+ENV TOKEN=${TOKEN}
 
 ################## Begin Installation ######################
 
 # Install Go Dependencies
-RUN go get gopkg.in/mgo.v2/bson \
-  github.com/gorilla/context \
-  gopkg.in/mgo.v2 \
-  github.com/dgrijalva/jwt-go \
+RUN go get github.com/gorilla/context \
   github.com/gorilla/mux \
-  github.com/BurntSushi/toml \
   github.com/google/go-github/github \
-  golang.org/x/oauth2
+  golang.org/x/oauth2 \
+  golang.org/x/net/context/ctxhttp
 
 
 # Copy Golang source code

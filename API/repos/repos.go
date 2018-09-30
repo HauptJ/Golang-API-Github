@@ -1,138 +1,162 @@
+/*
+FILE: repos.go
+DESC: /repos API endpoint functionality
+LAST MODIFIED: 30-SEPT-18 by Joshua Haupt
+*/
+
 package repos
 
 import (
-  "log"
-  "os"
-  "github.com/google/go-github/github"
-  "golang.org/x/oauth2"
-  "context"
+	"context"
+	"github.com/google/go-github/github"
+	"golang.org/x/oauth2"
+	"log"
+	"os"
 )
 
 type RepoName struct {
-  Owner string
-  Name string
+	Owner string
+	Name  string
 }
 
 type User struct {
-  Name string
-  Repos []RepoName
+	Name  string
+	Repos []RepoName
 }
 
 type Repo struct {
-  RepoName
-  Stargazers []string
+	RepoName
+	Stargazers []string
 }
 
 type UserRepo struct {
-  Users []User
-  Repos []Repo
+	Users []User
+	Repos []Repo
 }
 
-func getUserObjGHAPI(GHUser string, numRepos int) (User, error) {
+/*
+DESC: Calls the GitHub API and creates and returns an object of type User which contains a list of repositories for the specified user.
+IN: GHUser: the specified username to list repositories for, numRepos: the number of repositories to list for the specified user
+OUT: An object of type User which contains the list of repositories for a specified user - SUCCESSl; err - FAILURE
+*/
+func getUserObjGHAPI(GHUser string, numRepos uint8) (User, error) {
 
-  token := os.Getenv("TOKEN")
-  context := context.Background()
-  tokenService := oauth2.StaticTokenSource(
-    &oauth2.Token{AccessToken: token},
-  )
-  tokenClient := oauth2.NewClient(context, tokenService)
+	token := os.Getenv("TOKEN")
+	context := context.Background()
+	tokenService := oauth2.StaticTokenSource(
+		&oauth2.Token{AccessToken: token},
+	)
+	tokenClient := oauth2.NewClient(context, tokenService)
 
-  client := github.NewClient(tokenClient)
+	client := github.NewClient(tokenClient)
 
-  var repoList []RepoName
+	var repoList []RepoName
 
-  repoObjs, _, err := client.Repositories.List(context, GHUser, nil)
-  if err != nil {
-    log.Printf("Problem getting user repo information %v\n", err)
-    os.Exit(1)
-  }
+	opt := &github.RepositoryListOptions{
+		Visibility:  "public",
+		ListOptions: github.ListOptions{Page: 1, PerPage: int(numRepos)},
+	}
+	repoObjs, _, err := client.Repositories.List(context, GHUser, opt)
+	if err != nil {
+		log.Printf("Problem getting user repo information %v\n", err)
+		os.Exit(1)
+	}
 
-  if len(repoObjs) < numRepos {
-    numRepos = len(repoObjs)
-  }
+	if len(repoObjs) < int(numRepos) {
+		numRepos = uint8(len(repoObjs))
+	}
 
-  for _, repoObj := range repoObjs {
-    repoNameObj := RepoName{Owner: *repoObj.Owner.Login, Name: *repoObj.Name} //TODO: Improve this by passing option to request only numRepos repos
-    repoList = append(repoList, repoNameObj)
-  }
-  repoList = repoList[:numRepos] //NOTE SEE: TODO
+	for _, repoObj := range repoObjs {
+		repoNameObj := RepoName{Owner: *repoObj.Owner.Login, Name: *repoObj.Name}
+		repoList = append(repoList, repoNameObj)
+	}
 
-  GHUserObj := User{Name: GHUser, Repos: repoList}
+	GHUserObj := User{Name: GHUser, Repos: repoList}
 
-  return GHUserObj, err
+	return GHUserObj, err
 }
 
-func getRepoObjGHAPI(repo RepoName, numStargazers int) (Repo, error) {
+/*
+DESC: Calls the GitHub API and creates and returns an object of type Repo which contains a list of stargazers for a specified repository.
+IN: GHRepo: of type RepoName - the specified GitHub repository, numStargazers: the number of stargazers to list for the specified repo
+OUT: An object of type Repo which contains the list of stargazers for a specified repository - SUCCESS; err - FAILURE
+*/
+func getRepoObjGHAPI(GHRepo RepoName, numStargazers uint8) (Repo, error) {
 
-  token := os.Getenv("TOKEN")
-  context := context.Background()
-  tokenService := oauth2.StaticTokenSource(
-    &oauth2.Token{AccessToken: token},
-  )
-  tokenClient := oauth2.NewClient(context, tokenService)
+	token := os.Getenv("TOKEN")
+	context := context.Background()
+	tokenService := oauth2.StaticTokenSource(
+		&oauth2.Token{AccessToken: token},
+	)
+	tokenClient := oauth2.NewClient(context, tokenService)
 
-  client := github.NewClient(tokenClient)
+	client := github.NewClient(tokenClient)
 
-  var stargazerList []string
+	var stargazerList []string
 
-  stargazerUserObjs, _, err := client.Activity.ListStargazers(context, repo.Owner, repo.Name, nil)
-  if err != nil {
-    log.Printf("Problem getting stargazer information %v\n", err)
-  }
+	opt := &github.ListOptions{Page: 1, PerPage: int(numStargazers)}
+	stargazerUserObjs, _, err := client.Activity.ListStargazers(context, GHRepo.Owner, GHRepo.Name, opt)
+	if err != nil {
+		log.Printf("Problem getting stargazer information %v\n", err)
+	}
 
-  if len(stargazerUserObjs) < numStargazers {
-    numStargazers = len(stargazerUserObjs)
-  }
+	if len(stargazerUserObjs) < int(numStargazers) {
+		numStargazers = uint8(len(stargazerUserObjs))
+	}
 
-  for _, stargazerUserObj := range stargazerUserObjs {
-    stargazerList = append(stargazerList, *stargazerUserObj.User.Login) //TODO: Improve this by passing option to request only numStargazers stargazers
-  }
-  stargazerList  = stargazerList[:numStargazers] //NOTE SEE: TODO
+	for _, stargazerUserObj := range stargazerUserObjs {
+		stargazerList = append(stargazerList, *stargazerUserObj.User.Login)
+	}
 
-  repoObj := Repo{RepoName: repo, Stargazers: stargazerList}
+	repoObj := Repo{RepoName: GHRepo, Stargazers: stargazerList}
 
-  return repoObj, err
+	return repoObj, err
 }
 
-func GenRepoStargazerLists(rootUser string, numLvls, numRepos, numStargazers int) (UserRepo, error) {
+/*
+DESC: Returns a list of 5 repositories for a specified GitHub user and a list of 5 stargazers for each repository. The lists go numLvls levels deep.
+IN: rootUser: the initial username to list repositories for, numLvls: the number of levels deep to run, numRepos: the number of repositories to list for the specified user, numStargazers: the number of stargazers to list for the specified repo
+OUT: An object of type UserRepo which contains the list of User objects and the list of Repo objects
+*/
+func GenRepoStargazerLists(rootUser string, numLvls, numRepos, numStargazers uint8) (UserRepo, error) {
 
-  var userObjList []User
-  var newUserObj User
-  var repoObjList []Repo
-  var repoObj Repo
-  var newRepoObj Repo
+	var userObjList []User
+	var newUserObj User
+	var repoObjList []Repo
+	var repoObj Repo
+	var newRepoObj Repo
 
-  userObj, err := getUserObjGHAPI(rootUser, numRepos)
-  if err != nil {
-    log.Fatal(err)
-  }
-  userObjList = append(userObjList, userObj)
-  for _, repo := range userObj.Repos {
-    repoObj, err = getRepoObjGHAPI(repo, numStargazers)
-    if err != nil {
-      log.Fatal(err)
-    }
-    repoObjList = append(repoObjList, repoObj)
-  }
-  for i := 1; i <= numLvls; i++ {
-    for _, stargazer := range repoObj.Stargazers {
-      newUserObj, err = getUserObjGHAPI(stargazer, numRepos)
-      if err != nil {
-        log.Fatal(err)
-      }
-      userObjList = append(userObjList, newUserObj)
-      for _, repo := range newUserObj.Repos {
-        newRepoObj, err = getRepoObjGHAPI(repo, numStargazers)
-        if err != nil {
-          log.Fatal(err)
-        }
-        repoObjList = append(repoObjList, newRepoObj)
-      }
-      repoObj = newRepoObj
-    }
-    userObj = newUserObj
-  }
+	userObj, err := getUserObjGHAPI(rootUser, numRepos)
+	if err != nil {
+		log.Fatal(err)
+	}
+	userObjList = append(userObjList, userObj)
+	for _, repo := range userObj.Repos {
+		repoObj, err = getRepoObjGHAPI(repo, numStargazers)
+		if err != nil {
+			log.Fatal(err)
+		}
+		repoObjList = append(repoObjList, repoObj)
+	}
+	for i := 1; i <= int(numLvls); i++ {
+		for _, stargazer := range repoObj.Stargazers {
+			newUserObj, err = getUserObjGHAPI(stargazer, numRepos)
+			if err != nil {
+				log.Fatal(err)
+			}
+			userObjList = append(userObjList, newUserObj)
+			for _, repo := range newUserObj.Repos {
+				newRepoObj, err = getRepoObjGHAPI(repo, numStargazers)
+				if err != nil {
+					log.Fatal(err)
+				}
+				repoObjList = append(repoObjList, newRepoObj)
+			}
+			repoObj = newRepoObj
+		}
+		userObj = newUserObj
+	}
 
-  outputObj := UserRepo{Users: userObjList, Repos: repoObjList}
-  return outputObj, err
+	outputObj := UserRepo{Users: userObjList, Repos: repoObjList}
+	return outputObj, err
 }
