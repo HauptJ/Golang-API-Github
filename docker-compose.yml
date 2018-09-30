@@ -9,4 +9,4 @@ services:
       - "8880:8880"
     command: ["/githubAPI/main"]
     environment:
-      TOKEN: GH_API_TOKEN
+      TOKEN: ${TOKEN}
