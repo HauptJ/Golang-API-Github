@@ -1,7 +1,5 @@
 # Golang-API-GitHub
-<<<<<<< HEAD
-Golang API that returns Github follower and stargazer usernames and follower repositories
-=======
+
 Golang API that returns Github user / stargazer usernames and repositories as well as follower repositories.
 Utilizes the [go-github](https://github.com/google/go-github) package to interface with the [Github API](https://developer.github.com/v3/?)
 
