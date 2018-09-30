@@ -1,0 +1,12 @@
+version: '3'
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: GitHub_API
+    ports:
+      - "8880:8880"
+    command: ["/githubAPI/main"]
+    environment:
+      TOKEN: ${TOKEN}
