@@ -42,6 +42,7 @@ Utilizes the [go-github](https://github.com/google/go-github) package to interfa
   - `docker-compose up`
 
 ### Endpoints:
+
 #### /followers
 - **TYPE:** GET
 - Returns a list of 5 followers for the specified Github user as well as the followers of the followers 3 levels deep.
