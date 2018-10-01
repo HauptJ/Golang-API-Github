@@ -30,7 +30,7 @@ Utilizes the [go-github](https://github.com/google/go-github) package to interfa
 
 5. Set the token as an environment variable named `TOKEN`
   - **Windows:** `$env:TOKEN="Github API TOKEN"`
-  - **Linux:** `TOKEN="Github API TOKEN"`
+  - **Linux:** `export TOKEN="Github API TOKEN"`
 
 
 6. To run on host system
