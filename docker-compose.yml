@@ -10,3 +10,9 @@ services:
     command: ["/githubAPI/main"]
     environment:
       TOKEN: ${TOKEN}
+    healthcheck:
+      test: curl --fail -s http://localhost:8880/followers/hauptj || exit 1
+      interval: 1m30s
+      timeout: 10s
+      retries: 3
+
