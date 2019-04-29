@@ -7,12 +7,13 @@ LAST MODIFIED: 30-SEPT-18 by Joshua Haupt
 package main
 
 import (
-	"./followers"
-	"./repos"
 	"encoding/json"
-	"github.com/gorilla/mux"
 	"log"
 	"net/http"
+
+	"./followers"
+	"./repos"
+	"github.com/gorilla/mux"
 )
 
 /*
@@ -58,7 +59,7 @@ func respondWithError(writer http.ResponseWriter, code int, msg string) {
 func respondWithJson(writer http.ResponseWriter, code int, payload interface{}) {
 	response, err := json.Marshal(payload)
 	if err != nil {
-		log.Fatal(err)
+		log.Printf("Problem generating JSON response %v\n", err)
 	}
 	writer.Header().Set("Content-Type", "application/json")
 	writer.WriteHeader(code)
