@@ -8,10 +8,11 @@ package followers
 
 import (
 	"context"
-	"github.com/google/go-github/github"
-	"golang.org/x/oauth2"
 	"log"
 	"os"
+
+	"github.com/google/go-github/github"
+	"golang.org/x/oauth2"
 )
 
 type User struct {
@@ -41,7 +42,6 @@ func getUserObjGHAPI(GHUser string, numFollowers uint8) (User, error) {
 	followerObjs, _, err := client.Users.ListFollowers(context, GHUser, opt)
 	if err != nil {
 		log.Printf("Problem getting follower information %v\n", err)
-		os.Exit(1)
 	}
 
 	if len(followerObjs) < int(numFollowers) {
@@ -69,7 +69,7 @@ func GenUserObjList(rootUser string, numLvls, numFollowers uint8) ([]User, error
 
 	userObj, err := getUserObjGHAPI(rootUser, numFollowers)
 	if err != nil {
-		log.Fatal(err)
+		log.Printf("Problem getting user follower information %v\n", err)
 	}
 	userObjList = append(userObjList, userObj)
 	for i := 1; i <= int(numLvls); i++ {
@@ -77,7 +77,7 @@ func GenUserObjList(rootUser string, numLvls, numFollowers uint8) ([]User, error
 			newUserObj, err = getUserObjGHAPI(follower, numFollowers)
 			userObjList = append(userObjList, newUserObj)
 			if err != nil {
-				log.Fatal(err)
+				log.Printf("Problem getting user follower information %v\n", err)
 			}
 		}
 		userObj = newUserObj

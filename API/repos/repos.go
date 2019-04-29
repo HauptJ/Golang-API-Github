@@ -8,10 +8,11 @@ package repos
 
 import (
 	"context"
-	"github.com/google/go-github/github"
-	"golang.org/x/oauth2"
 	"log"
 	"os"
+
+	"github.com/google/go-github/github"
+	"golang.org/x/oauth2"
 )
 
 type RepoName struct {
@@ -59,7 +60,6 @@ func getUserObjGHAPI(GHUser string, numRepos uint8) (User, error) {
 	repoObjs, _, err := client.Repositories.List(context, GHUser, opt)
 	if err != nil {
 		log.Printf("Problem getting user repo information %v\n", err)
-		os.Exit(1)
 	}
 
 	if len(repoObjs) < int(numRepos) {
@@ -128,13 +128,13 @@ func GenRepoStargazerLists(rootUser string, numLvls, numRepos, numStargazers uin
 
 	userObj, err := getUserObjGHAPI(rootUser, numRepos)
 	if err != nil {
-		log.Fatal(err)
+		log.Printf("Problem getting user repo information %v\n", err)
 	}
 	userObjList = append(userObjList, userObj)
 	for _, repo := range userObj.Repos {
 		repoObj, err = getRepoObjGHAPI(repo, numStargazers)
 		if err != nil {
-			log.Fatal(err)
+			log.Printf("Problem getting user repo information %v\n", err)
 		}
 		repoObjList = append(repoObjList, repoObj)
 	}
@@ -142,13 +142,13 @@ func GenRepoStargazerLists(rootUser string, numLvls, numRepos, numStargazers uin
 		for _, stargazer := range repoObj.Stargazers {
 			newUserObj, err = getUserObjGHAPI(stargazer, numRepos)
 			if err != nil {
-				log.Fatal(err)
+				log.Printf("Problem getting user information %v\n", err)
 			}
 			userObjList = append(userObjList, newUserObj)
 			for _, repo := range newUserObj.Repos {
 				newRepoObj, err = getRepoObjGHAPI(repo, numStargazers)
 				if err != nil {
-					log.Fatal(err)
+					log.Printf("Problem getting user repo information %v\n", err)
 				}
 				repoObjList = append(repoObjList, newRepoObj)
 			}
