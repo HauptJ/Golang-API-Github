@@ -140,23 +140,39 @@ func GenRepoStargazerLists(rootUser string, numLvls, numRepos, numStargazers uin
 	}
 	for i := 1; i <= int(numLvls); i++ {
 		for _, stargazer := range repoObj.Stargazers {
-			newUserObj, err = getUserObjGHAPI(stargazer, numRepos)
-			if err != nil {
-				log.Printf("Problem getting user information %v\n", err)
-			}
-			userObjList = append(userObjList, newUserObj)
-			for _, repo := range newUserObj.Repos {
-				newRepoObj, err = getRepoObjGHAPI(repo, numStargazers)
+			if IsDuplicateUser(stargazer, userObjList) == false {
+				newUserObj, err = getUserObjGHAPI(stargazer, numRepos)
 				if err != nil {
-					log.Printf("Problem getting user repo information %v\n", err)
+					log.Printf("Problem getting user information %v\n", err)
 				}
-				repoObjList = append(repoObjList, newRepoObj)
+				userObjList = append(userObjList, newUserObj)
+				for _, repo := range newUserObj.Repos {
+					newRepoObj, err = getRepoObjGHAPI(repo, numStargazers)
+					if err != nil {
+						log.Printf("Problem getting user repo information %v\n", err)
+					}
+					repoObjList = append(repoObjList, newRepoObj)
+				}
+				repoObj = newRepoObj
 			}
-			repoObj = newRepoObj
 		}
 		userObj = newUserObj
 	}
 
 	outputObj := UserRepo{Users: userObjList, Repos: repoObjList}
 	return outputObj, err
+}
+
+/*
+DESC: Checks if a repos's stargazer has already been visited
+IN: stargazer: the stargazers's name: userObjList: the current list of users
+OUT: bool: true if the stargazer has already been visited, false if the user has never been visited
+*/
+func IsDuplicateUser(stargazer string, userObjList []User) bool {
+	for _, user := range userObjList {
+		if user.Name == stargazer {
+			return true
+		}
+	}
+	return false
 }
