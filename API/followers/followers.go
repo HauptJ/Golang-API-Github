@@ -74,13 +74,29 @@ func GenUserObjList(rootUser string, numLvls, numFollowers uint8) ([]User, error
 	userObjList = append(userObjList, userObj)
 	for i := 1; i <= int(numLvls); i++ {
 		for _, follower := range userObj.Followers {
-			newUserObj, err = getUserObjGHAPI(follower, numFollowers)
-			userObjList = append(userObjList, newUserObj)
-			if err != nil {
-				log.Printf("Problem getting user follower information %v\n", err)
+			if IsDuplicateUser(follower, userObjList) == false {
+				newUserObj, err = getUserObjGHAPI(follower, numFollowers)
+				userObjList = append(userObjList, newUserObj)
+				if err != nil {
+					log.Printf("Problem getting user follower information %v\n", err)
+				}
 			}
 		}
 		userObj = newUserObj
 	}
 	return userObjList, err
+}
+
+/*
+DESC: Checks if a user's follower has already been visited
+IN: follower: the follower's name: userObjList: the current list of users
+OUT: bool: true if the follower has already been visited, false if the user has never been visited
+*/
+func IsDuplicateUser(follower string, userObjList []User) bool {
+	for _, user := range userObjList {
+		if user.Name == follower {
+			return true
+		}
+	}
+	return false
 }
