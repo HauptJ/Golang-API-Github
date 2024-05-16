@@ -10,10 +10,9 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
-
-	"./followers"
-	"./repos"
 	"github.com/gorilla/mux"
+	"github.com/HauptJ/Golang-API-Github/API/followers"
+	"github.com/HauptJ/Golang-API-Github/API/repos"
 )
 
 /*
