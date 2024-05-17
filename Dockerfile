@@ -4,7 +4,7 @@
 ############################################################
 
 # Set the base image to Golang Latest
-FROM golang:latest
+FROM golang:1.22.0
 
 # File Author / Maintainer
 MAINTAINER joshua@hauptj.com
