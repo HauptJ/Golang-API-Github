@@ -1,9 +1,9 @@
 ############################################################
 # Dockerfile for Github Golang API
-# Based on golang latest
+# Based on golang 1.22.0
 ############################################################
 
-# Set the base image to Golang Latest
+# Set the base image to Golang 1.22.0
 FROM golang:1.22.0
 
 # File Author / Maintainer
