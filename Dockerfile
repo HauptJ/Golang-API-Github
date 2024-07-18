@@ -29,4 +29,4 @@ RUN go build -o main .
 # Run API
 CMD ["/githubAPI/main"]
 
-HEALTHCHECK CMD curl --fail http://localhost:8880/followers/hauptj || exit 1
+# HEALTHCHECK CMD curl --fail http://localhost:8880/followers/hauptj || exit 1
